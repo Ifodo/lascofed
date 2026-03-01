@@ -1,0 +1,218 @@
+[
+    {
+        "id":  1,
+        "name":  "Chief Ilori",
+        "union":  "Agege",
+        "position":  "MCU President",
+        "phone":  "08060436359",
+        "email":  ""
+    },
+    {
+        "id":  2,
+        "name":  "Mr. Adenekan Idowu Rilwan",
+        "union":  "Ajeromi/Ifelodun",
+        "position":  "MCU President",
+        "phone":  "08023199162",
+        "email":  "adenekani@gmail.com"
+    },
+    {
+        "id":  3,
+        "name":  "Mr. Ameh Sunday",
+        "union":  "Apapa",
+        "position":  "MCU President",
+        "phone":  "08033348478",
+        "email":  "amehsundakor2021@gmail.com"
+    },
+    {
+        "id":  4,
+        "name":  "Mr. Omowa Adebori Johnson",
+        "union":  "Alimosho",
+        "position":  "MCU President",
+        "phone":  "08093179370",
+        "email":  "adeborijohnson8@gmail.com"
+    },
+    {
+        "id":  5,
+        "name":  "Alh. Ishola Balogun",
+        "union":  "Amuwo/Odofin",
+        "position":  "MCU President",
+        "phone":  "08036688535",
+        "email":  "isholaism@gmail.com"
+    },
+    {
+        "id":  6,
+        "name":  "Mr. Safuraini Tunji Otunla",
+        "union":  "Alausa",
+        "position":  "MCU President",
+        "phone":  "08033742386",
+        "email":  "tunjiotunla@gmail.com"
+    },
+    {
+        "id":  7,
+        "name":  "Mr. Ogungbe Elijah Sonayon",
+        "union":  "Badagry",
+        "position":  "MCU President",
+        "phone":  "08079671250",
+        "email":  "elijah.ogungbe@gmail.com"
+    },
+    {
+        "id":  8,
+        "name":  "Alhaji Shabi Ismail",
+        "union":  "Epe",
+        "position":  "MCU President",
+        "phone":  "08062188219",
+        "email":  "honismailshabi@gmail.com"
+    },
+    {
+        "id":  9,
+        "name":  "Mr. Aderoku Akinpelu Goriola",
+        "union":  "Eti-Osa",
+        "position":  "MCU President",
+        "phone":  "08096217381",
+        "email":  "gorialan2014@gmail.com"
+    },
+    {
+        "id":  10,
+        "name":  "Mr. Abiodun Kehinde Olu",
+        "union":  "Ibeju Lekki",
+        "position":  "MCU President",
+        "phone":  "08037265636",
+        "email":  "kingkennyabby@yahoo.com"
+    },
+    {
+        "id":  11,
+        "name":  "Mr. Abolaji Adedayo Titus",
+        "union":  "Ifako/Ijaiye",
+        "position":  "MCU President",
+        "phone":  "08056282554",
+        "email":  "abolajiwater@gmail.com"
+    },
+    {
+        "id":  12,
+        "name":  "Mr. Adekunle Gbadamosi",
+        "union":  "Igando/Ikotun",
+        "position":  "MCU President",
+        "phone":  "08058440017",
+        "email":  "adekunle.gbadamosi@yahoo.com"
+    },
+    {
+        "id":  13,
+        "name":  "Mr. Lanre Ariyo",
+        "union":  "Ikeja",
+        "position":  "MCU President",
+        "phone":  "08056010530",
+        "email":  "laariyo2002@yahoo.com"
+    },
+    {
+        "id":  14,
+        "name":  "Eld. Adeshina Ayomide Mathew",
+        "union":  "Ikd. South",
+        "position":  "MCU President",
+        "phone":  "08023014243",
+        "email":  "ayomideadesina56@gmail.com"
+    },
+    {
+        "id":  15,
+        "name":  "Mr. Sunday C. Nwankwo",
+        "union":  "Ikd. North",
+        "position":  "MCU President",
+        "phone":  "08064332139",
+        "email":  "sundaynwankwo0@gmail.com"
+    },
+    {
+        "id":  16,
+        "name":  "Mr. Michael Avwioroko",
+        "union":  "Kosofe",
+        "position":  "MCU President",
+        "phone":  "09036294868",
+        "email":  "avwioroko@gmail.com"
+    },
+    {
+        "id":  17,
+        "name":  "Mr. Adelaja Shorunke",
+        "union":  "L/Island",
+        "position":  "MCU President",
+        "phone":  "07034138191",
+        "email":  ""
+    },
+    {
+        "id":  18,
+        "name":  "Mr. Hakeem Adewuyi",
+        "union":  "L/Mainland",
+        "position":  "MCU President",
+        "phone":  "08033208935",
+        "email":  "yadewuyi@unilag.edu.ng"
+    },
+    {
+        "id":  19,
+        "name":  "Mr. Garuba Liadi",
+        "union":  "Mushin",
+        "position":  "MCU President",
+        "phone":  "08052797821",
+        "email":  "liadi.garuba@ng.nestle.com"
+    },
+    {
+        "id":  20,
+        "name":  "Mr. Adebeso Adekunle Ganiu",
+        "union":  "Ojo",
+        "position":  "MCU President",
+        "phone":  "08036044340",
+        "email":  ""
+    },
+    {
+        "id":  21,
+        "name":  "Elder Oluwafemi Ariyo",
+        "union":  "Onigbongbo",
+        "position":  "MCU President",
+        "phone":  "08038055444",
+        "email":  "ariyofemi2@gmail.com"
+    },
+    {
+        "id":  22,
+        "name":  "Mr. Gbadebo T. Olayiwola",
+        "union":  "Oshodi",
+        "position":  "MCU President",
+        "phone":  "08161207133",
+        "email":  "olayiwola12367@gmail.com"
+    },
+    {
+        "id":  23,
+        "name":  "Mr. Jamiu Lawal",
+        "union":  "Shomolu",
+        "position":  "MCU President",
+        "phone":  "08028941304",
+        "email":  "jamiu.lawal83@yahoo.com"
+    },
+    {
+        "id":  24,
+        "name":  "Mr. Oyebola Michael",
+        "union":  "Surulere",
+        "position":  "MCU President",
+        "phone":  "08033450603",
+        "email":  "Michkay2004@gmail.com"
+    },
+    {
+        "id":  25,
+        "name":  "Mr. Olufemi Obakoya",
+        "union":  "LASCOFIS",
+        "position":  "Asso. President",
+        "phone":  "09034494483",
+        "email":  "chalce.obk@gmail.com"
+    },
+    {
+        "id":  26,
+        "name":  "Mr. Wasiu Ake",
+        "union":  "Artisans",
+        "position":  "Asso. President",
+        "phone":  "08038026701",
+        "email":  "Sulaymanwasiu361@gmail.com"
+    },
+    {
+        "id":  27,
+        "name":  "Princess Olukokun A. Olufunmilola",
+        "union":  "Women in Coop.",
+        "position":  "Asso. President",
+        "phone":  "08062101625",
+        "email":  "adeyinkafunmilola4@gmail.com"
+    }
+]

@@ -1,0 +1,144 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+.hero-bg-motion {
+  transform: scale(1.05);
+  transition: transform 4.8s ease;
+}
+
+.hero-image-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 900ms ease-in-out;
+}
+
+.hero-image-slide.is-active {
+  opacity: 1;
+}
+
+.hero-bg-motion-active {
+  transform: scale(1.12) translate3d(-1%, 1%, 0);
+}
+
+.hero-blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(34px);
+  opacity: 0.28;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.hero-blob-1 {
+  width: 19rem;
+  height: 19rem;
+  background: #14b8a6;
+  left: -3rem;
+  top: -4rem;
+  animation: hero-float-1 14s ease-in-out infinite;
+}
+
+.hero-blob-2 {
+  width: 14rem;
+  height: 14rem;
+  background: #34d399;
+  right: 1rem;
+  bottom: 2rem;
+  animation: hero-float-2 16s ease-in-out infinite;
+}
+
+.hero-reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  animation: hero-reveal-up 0.7s ease-out forwards;
+}
+
+.hero-reveal-delay-1 {
+  animation-delay: 0.12s;
+}
+
+.hero-reveal-delay-2 {
+  animation-delay: 0.24s;
+}
+
+.hero-reveal-delay-3 {
+  animation-delay: 0.36s;
+}
+
+@keyframes hero-pan {
+  from {
+    transform: scale(1.05) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.11) translate3d(-1%, 1%, 0);
+  }
+}
+
+@keyframes hero-float-1 {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(1.25rem, 1rem, 0);
+  }
+}
+
+@keyframes hero-float-2 {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(-1rem, -1.2rem, 0);
+  }
+}
+
+@keyframes hero-reveal-up {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-bg-motion,
+  .hero-image-slide,
+  .hero-blob,
+  .hero-reveal {
+    animation: none;
+    transition: none;
+  }
+
+  .hero-image-slide:first-child {
+    opacity: 1;
+  }
+
+  .hero-bg-motion,
+  .hero-bg-motion-active {
+    transform: none;
+  }
+
+  .hero-reveal {
+    opacity: 1;
+    transform: none;
+  }
+}
