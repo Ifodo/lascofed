@@ -109,7 +109,7 @@ export default function Home() {
               Monday - Friday • 9 AM - 5 PM
             </p>
             <h1 className="hero-reveal hero-reveal-delay-1 max-w-3xl text-2xl font-bold leading-tight sm:text-3xl md:text-6xl">
-              Welcome To Lagos State Cooperative Federation.
+              Welcome To Lagos State Cooperative Federation. Online Radio
             </h1>
             <p className="hero-reveal hero-reveal-delay-2 mt-5 max-w-2xl text-sm text-emerald-50 sm:text-base md:mt-6 md:text-lg">
               As the apex body for cooperative societies in Lagos State, LASCOFED leads with innovation,
