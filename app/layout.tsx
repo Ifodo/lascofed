@@ -14,9 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "LASCOFED - Lagos State Cooperative Federation",
+  title: "COOP Radio - LASCOFED Online Radio",
   description:
-    "Lagos State Cooperative Federation (LASCOFED): services, directory, events, and cooperative development programs.",
+    "COOP Radio by LASCOFED: live online radio, programs, news updates, events, and cooperative media content.",
 };
 
 export default function RootLayout({

@@ -1,0 +1,201 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  EDITOR
+}
+
+enum PublishStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum EventStatus {
+  UPCOMING
+  ONGOING
+  COMPLETED
+  CANCELLED
+}
+
+enum MessageStatus {
+  NEW
+  READ
+  RESOLVED
+}
+
+enum SettingScope {
+  PUBLIC
+  ADMIN
+  SYSTEM
+}
+
+model User {
+  id           String    @id @default(cuid())
+  fullName     String
+  email        String    @unique
+  passwordHash String
+  role         UserRole  @default(EDITOR)
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  newsPosts    NewsPost[]
+}
+
+model Presenter {
+  id          String        @id @default(cuid())
+  fullName    String
+  title       String?
+  bio         String?
+  imageUrl    String?
+  phone       String?
+  email       String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  programs    Program[]
+  schedules   ScheduleSlot[]
+}
+
+model Program {
+  id            String         @id @default(cuid())
+  slug          String         @unique
+  title         String
+  description   String
+  category      String?
+  coverImageUrl String?
+  isFeatured    Boolean        @default(false)
+  status        PublishStatus  @default(DRAFT)
+  presenterId   String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  presenter     Presenter?     @relation(fields: [presenterId], references: [id], onDelete: SetNull)
+  schedules     ScheduleSlot[]
+  episodes      Episode[]
+}
+
+model ScheduleSlot {
+  id               String      @id @default(cuid())
+  dayOfWeek        Int
+  startTime        String
+  endTime          String
+  timezone         String      @default("Africa/Lagos")
+  titleOverride    String?
+  isLive           Boolean     @default(false)
+  programId        String?
+  presenterId      String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  program          Program?    @relation(fields: [programId], references: [id], onDelete: SetNull)
+  presenter        Presenter?  @relation(fields: [presenterId], references: [id], onDelete: SetNull)
+
+  @@index([dayOfWeek, startTime])
+}
+
+model Episode {
+  id               String        @id @default(cuid())
+  slug             String        @unique
+  title            String
+  summary          String?
+  audioUrl         String?
+  videoUrl         String?
+  publishedAt      DateTime?
+  durationSeconds  Int?
+  category         String?
+  status           PublishStatus @default(DRAFT)
+  programId        String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  program          Program?      @relation(fields: [programId], references: [id], onDelete: SetNull)
+}
+
+model NewsPost {
+  id              String        @id @default(cuid())
+  slug            String        @unique
+  title           String
+  excerpt         String?
+  content         String
+  category        String?
+  coverImageUrl   String?
+  status          PublishStatus @default(DRAFT)
+  publishedAt     DateTime?
+  authorId        String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  author          User?         @relation(fields: [authorId], references: [id], onDelete: SetNull)
+
+  @@index([status, publishedAt])
+}
+
+model Event {
+  id              String       @id @default(cuid())
+  slug            String       @unique
+  title           String
+  description     String?
+  location        String?
+  startAt         DateTime
+  endAt           DateTime?
+  registrationUrl String?
+  status          EventStatus  @default(UPCOMING)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([startAt, status])
+}
+
+model DirectoryEntry {
+  id             String      @id @default(cuid())
+  name           String
+  category       String?
+  description    String?
+  contactName    String?
+  phone          String?
+  email          String?
+  websiteUrl     String?
+  address        String?
+  isPublished    Boolean     @default(true)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+}
+
+model Subscriber {
+  id            String      @id @default(cuid())
+  email         String      @unique
+  createdAt     DateTime    @default(now())
+}
+
+model ContactMessage {
+  id            String        @id @default(cuid())
+  fullName      String
+  email         String
+  subject       String
+  message       String
+  status        MessageStatus @default(NEW)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([createdAt, status])
+}
+
+model SiteSetting {
+  id            String       @id @default(cuid())
+  scope         SettingScope
+  key           String
+  value         String
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@unique([scope, key])
+}

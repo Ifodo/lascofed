@@ -8,11 +8,12 @@ type HeroMotionProps = {
   intervalMs?: number;
 };
 
-export default function HeroMotion({ images, intervalMs = 4500 }: HeroMotionProps) {
+export default function HeroMotion({ images, intervalMs = 6000 }: HeroMotionProps) {
   const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
     if (images.length < 2) {
+      // For single image, just keep it active with animation
       return;
     }
 
@@ -26,13 +27,13 @@ export default function HeroMotion({ images, intervalMs = 4500 }: HeroMotionProp
   return (
     <div className="absolute inset-0 opacity-25">
       {images.map((src, index) => {
-        const isActive = index === activeIndex;
+        const isActive = images.length === 1 || index === activeIndex;
 
         return (
           <div key={src} className={`hero-image-slide ${isActive ? "is-active" : ""}`}>
             <Image
               src={src}
-              alt="LASCOFED hero"
+              alt="COOP Radio Studio"
               fill
               priority={index === 0}
               sizes="100vw"

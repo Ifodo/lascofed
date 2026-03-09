@@ -1,270 +1,389 @@
-import {
-  AcademicCapIcon,
-  BookOpenIcon,
-  CalendarDaysIcon,
-  ChatBubbleLeftRightIcon,
-  EnvelopeIcon,
-  MapPinIcon,
-  NewspaperIcon,
-  PhoneIcon,
-  TableCellsIcon,
-  UserGroupIcon,
-} from "@heroicons/react/24/outline";
+import { CalendarDaysIcon, EnvelopeIcon, PhoneIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
-import type { ComponentType, SVGProps } from "react";
+import Link from "next/link";
 import SiteHeader from "./components/site-header";
-import directoryRows from "./data/directory-data.json";
-import DirectoryTable from "./components/directory-table";
 import HeroMotion from "./components/hero-motion";
-import CountUpNumber from "./components/count-up-number";
 import NewsletterForm from "./components/newsletter-form";
-
-type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
-
-const services = [
-  {
-    title: "Promotion Of Co-operative Societies",
-    description:
-      "Actively encouraging the growth and development of new and existing cooperatives.",
-    icon: UserGroupIcon as IconComponent,
-  },
-  {
-    title: "Education and Training",
-    description:
-      "Comprehensive schemes for training, licensing, and regulation of cooperative account managers.",
-    icon: AcademicCapIcon as IconComponent,
-  },
-  {
-    title: "Consultancy and Advisory",
-    description:
-      "Expert guidance on cooperative governance, operations, and compliance for long-term sustainability.",
-    icon: ChatBubbleLeftRightIcon as IconComponent,
-  },
-  {
-    title: "Educational Events",
-    description:
-      "Training sessions, conferences, retreats, seminars, and educational tours for members.",
-    icon: CalendarDaysIcon as IconComponent,
-  },
-  {
-    title: "Co-operative Resources",
-    description:
-      "Production and distribution of official cooperative stationery and resources.",
-    icon: BookOpenIcon as IconComponent,
-  },
-  {
-    title: "CoopLight NewsLetter",
-    description:
-      "Regular publication that keeps members informed, connected, and inspired.",
-    icon: NewspaperIcon as IconComponent,
-  },
-];
-
-const events = [
-  ["2021 LASCOFED Leaders Con", "24 October, 2021"],
-  ["2022 LASCOFED Leaders Con", "15 November, 2022"],
-  ["2023 Cooperative Leaders Con", "01 December, 2023"],
-  ["2024 Cooperative Leaders Con", "28 February, 2024"],
-];
-
-const testimonials = [
-  [
-    "Mrs. Adunni Oyewole",
-    "President, Evergreen Agro Cooperative Society",
-    "With LASCOFED's support, we became fully compliant and more efficient.",
-  ],
-  [
-    "Mr. Emeka Okoro",
-    "General Secretary, Creative Hands Youth Cooperative",
-    "We got legal help, exposure, and mentorship. LASCOFED truly supports young co-ops.",
-  ],
-  [
-    "Mrs. Bisi Adeniran",
-    "Vice President, Lagos Textile Cooperative Union",
-    "The customer service has been exceptional and consistently reliable.",
-  ],
-];
+import { getPublicSiteSettings } from "@/lib/site-settings";
+import { prisma } from "@/lib/prisma";
 
 const heroImages = [
-  "/lascofed-assets/slide2-ZM_zj46l.jpg",
-  "/lascofed-assets/building-ICgzlqVk.jpg",
-  "/lascofed-assets/youth1-B2ABNsDO.jpg",
+  "/enhanced_radio_studio.jpg",
 ];
 
-export default function Home() {
+const fallbackEvents = [
+  { title: "2021 LASCOFED Leaders Con", dateLabel: "24 October, 2021" },
+  { title: "2022 LASCOFED Leaders Con", dateLabel: "15 November, 2022" },
+  { title: "2023 Cooperative Leaders Con", dateLabel: "01 December, 2023" },
+  { title: "2024 Cooperative Leaders Con", dateLabel: "28 February, 2024" },
+];
+
+const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+function toLagosDate() {
+  return new Date(new Date().toLocaleString("en-US", { timeZone: "Africa/Lagos" }));
+}
+
+function formatTimeValue(value: number) {
+  return value.toString().padStart(2, "0");
+}
+
+type HomeContent = {
+  nowPlaying: {
+    title: string;
+    host: string;
+    time: string;
+  } | null;
+  schedule: Array<{
+    id: string;
+    dayLabel: string;
+    title: string;
+    time: string;
+    isLive: boolean;
+  }>;
+  programs: Array<{
+    id: string;
+    slug: string;
+    title: string;
+    description: string;
+    category: string | null;
+  }>;
+  news: Array<{
+    id: string;
+    slug: string;
+    title: string;
+    excerpt: string;
+    category: string;
+    coverImageUrl: string | null;
+  }>;
+  events: Array<{
+    id: string;
+    title: string;
+    dateLabel: string;
+  }>;
+};
+
+async function getHomeContent(): Promise<HomeContent> {
+  try {
+    const lagosNow = toLagosDate();
+    const dayOfWeek = lagosNow.getDay();
+    const currentTime = `${formatTimeValue(lagosNow.getHours())}:${formatTimeValue(lagosNow.getMinutes())}`;
+
+    const [featuredPrograms, latestNews, upcomingEvents, todaySlots] = await Promise.all([
+      prisma.program.findMany({
+        where: { status: "PUBLISHED", isFeatured: true },
+        orderBy: { updatedAt: "desc" },
+        take: 3,
+      }),
+      prisma.newsPost.findMany({
+        where: { status: "PUBLISHED" },
+        orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
+        take: 3,
+      }),
+      prisma.event.findMany({
+        where: { status: { in: ["UPCOMING", "ONGOING"] } },
+        orderBy: { startAt: "asc" },
+        take: 4,
+      }),
+      prisma.scheduleSlot.findMany({
+        where: { dayOfWeek },
+        orderBy: { startTime: "asc" },
+        include: {
+          program: {
+            select: {
+              title: true,
+              presenter: {
+                select: {
+                  fullName: true,
+                },
+              },
+            },
+          },
+          presenter: {
+            select: {
+              fullName: true,
+            },
+          },
+        },
+      }),
+    ]);
+
+    const liveSlot =
+      todaySlots.find((slot: typeof todaySlots[0]) => slot.isLive) ??
+      todaySlots.find((slot: typeof todaySlots[0]) => slot.startTime <= currentTime && slot.endTime > currentTime);
+
+    const programsToUse = featuredPrograms.length
+      ? featuredPrograms
+      : await prisma.program.findMany({
+          where: { status: "PUBLISHED" },
+          orderBy: { updatedAt: "desc" },
+          take: 3,
+        });
+
+    return {
+      nowPlaying: liveSlot
+        ? {
+            title: liveSlot.titleOverride || liveSlot.program?.title || "Live Program",
+            host: liveSlot.presenter?.fullName || liveSlot.program?.presenter?.fullName || "LASCOFED Team",
+            time: `${liveSlot.startTime} - ${liveSlot.endTime}`,
+          }
+        : null,
+      schedule: todaySlots.slice(0, 6).map((slot: typeof todaySlots[0]) => ({
+        id: slot.id,
+        dayLabel: dayNames[slot.dayOfWeek] ?? "Today",
+        title: slot.titleOverride || slot.program?.title || "Program TBA",
+        time: `${slot.startTime} - ${slot.endTime}`,
+        isLive: Boolean(slot.isLive),
+      })),
+      programs: programsToUse.map((program: typeof programsToUse[0]) => ({
+        id: program.id,
+        slug: program.slug,
+        title: program.title,
+        description: program.description,
+        category: program.category,
+      })),
+      news: latestNews.map((post: typeof latestNews[0]) => ({
+        id: post.id,
+        slug: post.slug,
+        title: post.title,
+        excerpt: post.excerpt || post.content.slice(0, 120),
+        category: post.category || "News",
+        coverImageUrl: post.coverImageUrl,
+      })),
+      events:
+        upcomingEvents.length > 0
+          ? upcomingEvents.map((event: typeof upcomingEvents[0]) => ({
+              id: event.id,
+              title: event.title,
+              dateLabel: event.startAt.toLocaleDateString("en-NG", {
+                day: "2-digit",
+                month: "long",
+                year: "numeric",
+              }),
+            }))
+          : fallbackEvents.map((event: typeof fallbackEvents[0], index: number) => ({
+              id: `fallback-${index}`,
+              ...event,
+            })),
+    };
+  } catch {
+    return {
+      nowPlaying: null,
+      schedule: [],
+      programs: [],
+      news: [],
+      events: fallbackEvents.map((event, index) => ({
+        id: `fallback-${index}`,
+        ...event,
+      })),
+    };
+  }
+}
+
+export default async function Home() {
+  const [settings, homeContent] = await Promise.all([getPublicSiteSettings(), getHomeContent()]);
+
   return (
     <div className="bg-slate-50 text-slate-900">
-      <SiteHeader />
+      <SiteHeader audioStreamUrl={settings.radioStreamUrl} videoStreamUrl={settings.videoStreamUrl} />
 
       <main>
         <section
           id="home"
-          className="relative isolate overflow-hidden bg-gradient-to-br from-emerald-900 via-emerald-700 to-teal-700"
+          className="relative isolate overflow-hidden bg-linear-to-br from-emerald-900 via-emerald-700 to-teal-700"
         >
           <div className="hero-blob hero-blob-1" />
           <div className="hero-blob hero-blob-2" />
           <HeroMotion images={heroImages} />
+
           <div className="relative mx-auto max-w-7xl px-4 py-16 text-white sm:px-5 md:px-8 md:py-24 lg:py-28">
-            <p className="hero-reveal mb-4 inline-flex rounded-full border border-white/30 bg-white/10 px-3 py-1 text-xs tracking-wide">
-              Monday - Friday • 9 AM - 5 PM
+            <p className="mb-4 inline-flex rounded-full border border-white/30 bg-white/10 px-3 py-1 text-xs tracking-wide">
+              COOP RADIO • Voice of Cooperative Development
             </p>
-            <h1 className="hero-reveal hero-reveal-delay-1 max-w-3xl text-2xl font-bold leading-tight sm:text-3xl md:text-6xl">
-              Lagos State Cooperative Federation (LASCOFED) Online Radio
-            </h1>
-            <p className="hero-reveal hero-reveal-delay-2 mt-5 max-w-2xl text-sm text-emerald-50 sm:text-base md:mt-6 md:text-lg">
-              As the apex body for cooperative societies in Lagos State, LASCOFED leads with innovation,
-              advocacy, and support for sustainable development.
+            <h1 className="max-w-3xl text-3xl font-bold leading-tight sm:text-4xl md:text-6xl">
+              Lagos State Cooperative Federation (LASCOFED)
+            </h1>            <p className="mt-3 text-xl font-semibold text-emerald-100 sm:text-2xl md:text-3xl">
+              COOP Online Radio
+            </p>            <p className="mt-4 max-w-2xl text-base text-emerald-50 md:mt-6 md:text-lg">
+              Listen live, discover today&apos;s broadcast schedule, and stay informed with cooperative updates from COOP Radio.
             </p>
-            <div className="hero-reveal hero-reveal-delay-3 mt-8 flex flex-wrap gap-3">
-              <a
-                href="#services"
-                className="rounded-full bg-red-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700"
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link
+                href="/livestream"
+                className="rounded-full bg-red-600 px-7 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-red-700"
               >
-                Explore Services
-              </a>
+                Listen Live
+              </Link>
               <a
-                href="/contact"
-                className="rounded-full border-2 border-red-400 px-6 py-3 text-sm font-semibold text-white transition hover:bg-red-600/20"
+                href="#schedule"
+                className="rounded-full border-2 border-red-300 px-7 py-3 text-sm font-semibold text-white transition hover:bg-red-600/20"
               >
-                Contact Us
+                View Schedule
               </a>
             </div>
           </div>
         </section>
 
-        <section id="about" className="mx-auto grid max-w-7xl gap-5 px-4 py-10 sm:px-5 md:grid-cols-2 md:px-8 md:py-12">
-          <blockquote className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <p className="text-lg italic text-slate-700">
-              “Cooperatives are a reminder to the international community that it is possible to pursue
-              both economic viability and social responsibility.”
-            </p>
-            <footer className="mt-4 text-sm font-semibold text-emerald-700">— Ban Ki-moon</footer>
-          </blockquote>
-          <blockquote className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <p className="text-lg italic text-slate-700">
-              “Cooperatives empower communities, foster shared prosperity, and uphold democratic values
-              in business.”
-            </p>
-            <footer className="mt-4 text-sm font-semibold text-emerald-700">
-              — International Cooperative Alliance
-            </footer>
-          </blockquote>
-        </section>
+        <section className="mx-auto max-w-7xl px-4 py-8 sm:px-5 md:px-8">
+          <article className="rounded-2xl border-2 border-emerald-100 bg-white p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 md:p-7">
+            <div className="grid gap-6 md:grid-cols-[1.3fr,1fr] md:items-center">
+              <div>
+                <p className="text-xs font-semibold tracking-widest text-emerald-700">NOW PLAYING</p>
+                <h2 className="mt-2 text-2xl font-bold text-slate-900 md:text-3xl">
+                  {homeContent.nowPlaying?.title ?? "No live show currently"}
+                </h2>
+                <p className="mt-2 text-sm text-slate-600">Host: {homeContent.nowPlaying?.host ?? "LASCOFED Team"}</p>
+                <p className="text-sm text-slate-600">Time: {homeContent.nowPlaying?.time ?? "Check today&apos;s schedule"}</p>
+              </div>
 
-        <section className="bg-white py-10 md:py-12">
-          <div className="mx-auto grid max-w-7xl gap-5 px-4 sm:px-5 md:grid-cols-3 md:px-8">
-            <div className="rounded-2xl border border-slate-200 p-6 text-center shadow-sm">
-              <p className="text-4xl font-bold text-emerald-700">
-                <CountUpNumber end={24} />
-              </p>
-              <p className="mt-2 text-sm text-slate-600">Multipurpose Cooperative Unions across Lagos State.</p>
-            </div>
-            <div className="rounded-2xl border border-slate-200 p-6 text-center shadow-sm">
-              <p className="text-4xl font-bold text-emerald-700">
-                <CountUpNumber end={3000} suffix="+" />
-              </p>
-              <p className="mt-2 text-sm text-slate-600">Registered and active societies and organizations.</p>
-            </div>
-            <div className="rounded-2xl border border-slate-200 p-6 text-center shadow-sm">
-              <p className="text-4xl font-bold text-emerald-700">
-                <CountUpNumber end={2000000} />
-              </p>
-              <p className="mt-2 text-sm text-slate-600">Cooperative members in various occupations statewide.</p>
-            </div>
-          </div>
-        </section>
-
-        <section id="services" className="mx-auto max-w-7xl px-4 py-12 sm:px-5 md:px-8 md:py-14">
-          <p className="text-sm font-semibold tracking-widest text-emerald-700">OUR SERVICES</p>
-          <h2 className="mt-2 text-2xl font-bold text-slate-900 md:text-3xl">
-            We assist Cooperatives to grow in Operations
-          </h2>
-          <p className="mt-3 max-w-3xl text-slate-600">
-            At LASCOFED, we are dedicated to fostering the sustainable growth and success of cooperative
-            societies throughout Lagos State.
-          </p>
-          <div className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {services.map((service) => (
-              <article key={service.title} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                <div className="inline-flex rounded-xl bg-emerald-50 p-3 text-emerald-700">
-                  <service.icon className="h-6 w-6" />
+              <div className="rounded-xl border-2 border-emerald-100 bg-linear-to-br from-emerald-50 to-teal-50 p-4 shadow-md">
+                <p className="text-xs font-semibold tracking-wide text-emerald-800">Quick Actions</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Link
+                    href="/livestream"
+                    className="inline-flex rounded-full bg-red-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-red-700"
+                  >
+                    Open Live Player
+                  </Link>
+                  <Link
+                    href="/programs"
+                    className="inline-flex rounded-full border border-red-600 px-4 py-2 text-xs font-semibold text-red-700 transition hover:bg-red-50"
+                  >
+                    Browse Programs
+                  </Link>
                 </div>
-                <h3 className="mt-3 text-lg font-semibold text-slate-900">{service.title}</h3>
-                <p className="mt-2 text-sm text-slate-600">{service.description}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className="bg-slate-900 py-12 text-white md:py-14">
-          <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-5 md:grid-cols-2 md:px-8">
-            <div>
-              <h2 className="text-2xl font-bold md:text-3xl">
-                Empowering Youth and Women in the Cooperative Movement.
-              </h2>
-              <p className="mt-4 text-slate-300">
-                LASCOFED creates inclusive platforms where young people and women can thrive through
-                business education, mentorship, and access to cooperative opportunities.
-              </p>
+                <p className="mt-3 text-xs text-slate-500">Studio line: {settings.callInPhone}</p>
+              </div>
             </div>
-            <div className="grid gap-4 md:grid-cols-2">
-              <Image
-                src="/lascofed-assets/youth1-B2ABNsDO.jpg"
-                alt="Youth in cooperative program"
-                width={800}
-                height={560}
-                className="h-56 w-full rounded-2xl object-cover"
-              />
-              <Image
-                src="/lascofed-assets/youth2-dQ3wl4jU.jpg"
-                alt="Women in cooperative initiative"
-                width={800}
-                height={560}
-                className="h-56 w-full rounded-2xl object-cover"
-              />
-            </div>
-          </div>
+          </article>
         </section>
 
-        <section id="directory" className="mx-auto max-w-7xl px-4 py-12 sm:px-5 md:px-8 md:py-14">
-          <p className="text-sm font-semibold tracking-widest text-emerald-700">OUR DIRECTORY</p>
-          <h2 className="mt-2 flex items-center gap-2 text-2xl font-bold md:text-3xl">
-            <TableCellsIcon className="h-7 w-7 text-emerald-700" />
-            Find a Cooperative Union Near You
-          </h2>
-          <div className="mt-6">
-            <DirectoryTable rows={directoryRows} pageSize={6} />
-          </div>
-        </section>
-
-        <section id="events" className="bg-white py-12 md:py-14">
+        <section id="schedule" className="bg-white py-12 md:py-14">
           <div className="mx-auto max-w-7xl px-4 sm:px-5 md:px-8">
-            <p className="text-sm font-semibold tracking-widest text-emerald-700">EVENTS</p>
-            <h2 className="mt-2 text-2xl font-bold md:text-3xl">Stay Connected with LASCOFED</h2>
-            <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              {events.map(([title, date]) => (
-                <article key={title} className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-                  <p className="inline-flex items-center gap-1 text-xs font-semibold tracking-wide text-emerald-700">
-                    <CalendarDaysIcon className="h-4 w-4" />
-                    {date}
-                  </p>
-                  <h3 className="mt-2 text-base font-semibold text-slate-900">{title}</h3>
-                </article>
-              ))}
+            <p className="text-sm font-semibold tracking-widest text-emerald-700">TODAY SCHEDULE</p>
+            <h2 className="mt-2 text-2xl font-bold text-slate-900 md:text-3xl">Current and Upcoming Shows</h2>
+            <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {homeContent.schedule.length > 0 ? (
+                homeContent.schedule.map((slot) => (
+                  <article key={slot.id} className={`rounded-2xl border-2 p-5 shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-1 ${
+                    slot.isLive 
+                      ? "border-red-300 bg-linear-to-br from-red-50 to-orange-50" 
+                      : "border-slate-200 bg-white hover:border-emerald-200"
+                  }`}>
+                    <p className="text-xs font-semibold tracking-wide text-emerald-700">{slot.dayLabel}</p>
+                    <h3 className="mt-2 text-base font-semibold text-slate-900">{slot.title}</h3>
+                    <p className="mt-1 text-sm text-slate-600">{slot.time}</p>
+                    {slot.isLive ? (
+                      <span className="mt-3 inline-flex rounded-full bg-red-600 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm">
+                        Live Now
+                      </span>
+                    ) : null}
+                  </article>
+                ))
+              ) : (
+                <p className="text-sm text-slate-500 md:col-span-2 lg:col-span-3">No schedule slots published yet.</p>
+              )}
             </div>
           </div>
         </section>
 
         <section className="mx-auto max-w-7xl px-4 py-12 sm:px-5 md:px-8 md:py-14">
-          <p className="text-sm font-semibold tracking-widest text-emerald-700">TESTIMONIALS</p>
-          <h2 className="mt-2 text-2xl font-bold md:text-3xl">What Our Members Say</h2>
-          <div className="mt-6 grid gap-5 md:grid-cols-3">
-            {testimonials.map(([name, role, quote]) => (
-              <article key={name} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                <p className="text-sm text-amber-500">★★★★★</p>
-                <p className="mt-3 text-sm text-slate-600">{quote}</p>
-                <p className="mt-4 font-semibold text-slate-900">{name}</p>
-                <p className="text-xs text-slate-500">{role}</p>
+          <div className="flex items-end justify-between gap-4">
+            <div>
+              <p className="text-sm font-semibold tracking-widest text-emerald-700">FEATURED PROGRAMS</p>
+              <h2 className="mt-2 text-2xl font-bold text-slate-900 md:text-3xl">Programs on COOP Radio</h2>
+            </div>
+            <Link href="/programs" className="text-sm font-semibold text-red-700 hover:text-red-800">
+              View all
+            </Link>
+          </div>
+          <div className="mt-6 grid gap-4 md:grid-cols-3">
+            {homeContent.programs.length > 0 ? (
+              homeContent.programs.map((program) => (
+                <article key={program.id} className="rounded-2xl border-2 border-slate-200 bg-white p-5 shadow-md hover:shadow-xl hover:border-emerald-300 transition-all duration-300 hover:-translate-y-1">
+                  <p className="text-xs font-semibold tracking-wide text-emerald-700">{program.category || "Program"}</p>
+                  <h3 className="mt-2 text-base font-semibold text-slate-900">{program.title}</h3>
+                  <p className="mt-2 text-sm text-slate-600">{program.description.slice(0, 110)}...</p>
+                  <Link
+                    href={`/programs/${program.slug}`}
+                    className="mt-3 inline-flex rounded-full border-2 border-red-600 px-3 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-600 hover:text-white"
+                  >
+                    View Details
+                  </Link>
+                </article>
+              ))
+            ) : (
+              <p className="text-sm text-slate-500 md:col-span-3">No published programs yet.</p>
+            )}
+          </div>
+        </section>
+
+        <section className="bg-white py-12 md:py-14">
+          <div className="mx-auto max-w-7xl px-4 sm:px-5 md:px-8">
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <p className="text-sm font-semibold tracking-widest text-emerald-700">LATEST NEWS</p>
+                <h2 className="mt-2 text-2xl font-bold text-slate-900 md:text-3xl">News & Announcements</h2>
+              </div>
+              <Link href="/news" className="text-sm font-semibold text-red-700 hover:text-red-800">
+                View all
+              </Link>
+            </div>
+            <div className="mt-6 grid gap-4 md:grid-cols-3">
+              {homeContent.news.length > 0 ? (
+                homeContent.news.map((post) => (
+                  <article key={post.id} className="rounded-2xl border-2 border-slate-200 bg-white shadow-lg hover:shadow-2xl hover:border-emerald-300 transition-all duration-300 hover:-translate-y-1 overflow-hidden">
+                    <div className="flex flex-col sm:flex-row h-full">
+                      {post.coverImageUrl && (
+                        <div className="relative h-40 sm:h-auto sm:w-[30%] bg-slate-100 shrink-0">
+                          <Image
+                            src={post.coverImageUrl}
+                            alt={post.title}
+                            fill
+                            className="object-contain p-2"
+                            sizes="(max-width: 640px) 100vw, 200px"
+                          />
+                        </div>
+                      )}
+                      <div className="flex flex-col p-5 sm:w-[70%]">
+                        <p className="text-xs font-semibold tracking-wide text-emerald-700">{post.category}</p>
+                        <h3 className="mt-2 text-base font-semibold text-slate-900">{post.title}</h3>
+                        <p className="mt-2 text-sm text-slate-600 flex-1">{post.excerpt}</p>
+                        <Link
+                          href={`/news/${post.slug}`}
+                          className="mt-3 inline-flex self-start rounded-full border-2 border-red-600 px-3 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-600 hover:text-white"
+                        >
+                          Read More
+                        </Link>
+                      </div>
+                    </div>
+                  </article>
+                ))
+              ) : (
+                <p className="text-sm text-slate-500 md:col-span-3">No published news yet.</p>
+              )}
+            </div>
+          </div>
+        </section>
+
+        <section id="events" className="mx-auto max-w-7xl px-4 py-12 sm:px-5 md:px-8 md:py-14">
+          <div className="flex items-end justify-between gap-4">
+            <div>
+              <p className="text-sm font-semibold tracking-widest text-emerald-700">UPCOMING EVENTS</p>
+              <h2 className="mt-2 text-2xl font-bold text-slate-900 md:text-3xl">Stay Connected with LASCOFED</h2>
+            </div>
+            <Link href="/events" className="text-sm font-semibold text-red-700 hover:text-red-800">
+              View all
+            </Link>
+          </div>
+          <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {homeContent.events.map((event) => (
+              <article key={event.id} className="rounded-2xl border-2 border-slate-200 bg-white p-5 shadow-md hover:shadow-xl hover:border-emerald-300 transition-all duration-300 hover:-translate-y-1">
+                <p className="inline-flex items-center gap-1 text-xs font-semibold tracking-wide text-emerald-700">
+                  <CalendarDaysIcon className="h-4 w-4" />
+                  {event.dateLabel}
+                </p>
+                <h3 className="mt-2 text-base font-semibold text-slate-900">{event.title}</h3>
               </article>
             ))}
           </div>
@@ -273,54 +392,25 @@ export default function Home() {
         <section id="contact" className="bg-[#070b14] py-12 text-white md:py-14">
           <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-5 md:grid-cols-2 md:px-8 lg:grid-cols-3">
             <div>
-              <h2 className="text-2xl font-bold md:text-3xl">Subscribe to CoopLight NewsLetter!</h2>
+              <h2 className="text-2xl font-bold md:text-3xl">Subscribe for Updates</h2>
               <p className="mt-3 max-w-lg text-white/85">
-                Stay informed with updates, publications, and opportunities from Lagos State Cooperative
-                Federation.
+                Get cooperative news, program alerts, and announcements directly in your inbox.
               </p>
               <NewsletterForm />
             </div>
             <div className="space-y-2 text-sm text-white/85">
               <p className="font-semibold text-white">Contact Information</p>
-              <p className="flex items-start gap-2">
-                <MapPinIcon className="mt-0.5 h-4 w-4 shrink-0" />
-                Plot 13, Isaacstan Close, Off Wempco Road, Ogba, Lagos, Nigeria
-              </p>
               <p className="flex items-center gap-2">
                 <PhoneIcon className="h-4 w-4" />
-                +2348132930811
+                {settings.callInPhone}
               </p>
               <p className="flex items-center gap-2">
                 <EnvelopeIcon className="h-4 w-4" />
-                contact@lascofed.com
+                contact@coopradiong.com
               </p>
-              <div className="pt-2">
-                <p className="font-semibold text-white">Follow Us</p>
-                <div className="mt-2 flex flex-wrap items-center gap-4">
-                  <a
-                    href="http://www.instagram.com/lascofedcoop"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/30 text-white/85 transition hover:border-white hover:text-white"
-                    aria-label="Instagram"
-                  >
-                    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor" aria-hidden="true">
-                      <path d="M7.75 2h8.5A5.75 5.75 0 0 1 22 7.75v8.5A5.75 5.75 0 0 1 16.25 22h-8.5A5.75 5.75 0 0 1 2 16.25v-8.5A5.75 5.75 0 0 1 7.75 2Zm0 1.5A4.25 4.25 0 0 0 3.5 7.75v8.5A4.25 4.25 0 0 0 7.75 20.5h8.5a4.25 4.25 0 0 0 4.25-4.25v-8.5A4.25 4.25 0 0 0 16.25 3.5h-8.5Zm9.5 2.25a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 1.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z" />
-                    </svg>
-                  </a>
-                  <a
-                    href="https://web.facebook.com/Lascofedcoop/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/30 text-white/85 transition hover:border-white hover:text-white"
-                    aria-label="Facebook"
-                  >
-                    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor" aria-hidden="true">
-                      <path d="M13.5 22v-8.2h2.75l.41-3.2H13.5V8.55c0-.93.26-1.56 1.59-1.56h1.7V4.12c-.82-.09-1.64-.14-2.47-.14-2.45 0-4.13 1.5-4.13 4.24v2.37H7.5v3.2h2.69V22h3.31Z" />
-                    </svg>
-                  </a>
-                </div>
-              </div>
+              <p className="pt-2 text-white/75">
+                Call in during live programs and engage with cooperative discussions and community updates.
+              </p>
             </div>
             <div className="flex items-start justify-start md:col-span-2 lg:col-span-1 lg:justify-end">
               <div className="flex flex-wrap items-center gap-5 lg:justify-end">
@@ -329,26 +419,20 @@ export default function Home() {
                   alt="Co-operative Federation of Nigeria"
                   width={180}
                   height={120}
-                  className="h-auto w-[130px]"
+                  className="h-auto w-32.5"
                 />
                 <Image
                   src="/footer-assets/international-cooperative-alliance.png"
                   alt="International Cooperative Alliance"
                   width={200}
                   height={100}
-                  className="h-auto w-[150px]"
+                  className="h-auto w-37.5"
                 />
               </div>
             </div>
-          </div>
-          <div className="mx-auto mt-8 max-w-7xl px-4 text-center text-xs text-white/70 sm:px-5 md:px-8">
-            <p>©{new Date().getFullYear()} LASCOFED. All rights reserved. | Powered by Elektran Integrated Services</p>
           </div>
         </section>
       </main>
     </div>
   );
 }
-
-
-

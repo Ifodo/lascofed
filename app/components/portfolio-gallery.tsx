@@ -177,7 +177,7 @@ export default function PortfolioGallery({ albums }: PortfolioGalleryProps) {
       <div className="mt-6 grid gap-6 xl:grid-cols-[1.2fr,0.8fr]">
         {activeAlbum ? (
           <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm md:p-5">
-            <div className="relative h-[340px] overflow-hidden rounded-xl bg-slate-100 md:h-[500px]">
+            <div className="relative h-85 overflow-hidden rounded-xl bg-slate-100 md:h-125">
               {isImageUrl(activeMedia) ? (
                 <Image
                   src={activeMedia}
@@ -200,7 +200,7 @@ export default function PortfolioGallery({ albums }: PortfolioGalleryProps) {
                 </div>
               )}
 
-              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/65 to-transparent p-4 text-white">
+              <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/65 to-transparent p-4 text-white">
                 <p className="text-xs uppercase tracking-widest text-emerald-100">Featured Album</p>
                 <h3 className="mt-1 line-clamp-2 text-lg font-bold md:text-2xl">{activeAlbum.title}</h3>
                 <p className="text-sm text-emerald-100">

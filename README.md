@@ -18,7 +18,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ## Contact Form Email Setup
 
-To send contact form submissions to `contact@lascofed.com`, configure these environment variables in `.env.local`:
+To send contact form submissions to `contact@coopradiong.com`, configure these environment variables in `.env.local`:
 
 ```bash
 SMTP_HOST=your.smtp.host
@@ -27,10 +27,39 @@ SMTP_SECURE=false
 SMTP_USER=your_smtp_username
 SMTP_PASS=your_smtp_password
 CONTACT_FROM=your_from_email
-CONTACT_TO=contact@lascofed.com
+CONTACT_TO=contact@coopradiong.com
 ```
 
-If `CONTACT_TO` is not set, the app defaults to `contact@lascofed.com`.
+If `CONTACT_TO` is not set, the app defaults to `contact@coopradiong.com`.
+
+## Admin Portal + Database Setup (Phase 1)
+
+1. Copy `.env.example` values into `.env.local` and set:
+
+- `DATABASE_URL`
+- `ADMIN_AUTH_SECRET`
+- `ADMIN_SEED_EMAIL`
+- `ADMIN_SEED_PASSWORD`
+
+2. Generate Prisma client:
+
+```bash
+npm run prisma:generate
+```
+
+3. Create database tables:
+
+```bash
+npm run prisma:migrate
+```
+
+4. Seed the first admin user and default public site settings:
+
+```bash
+npm run prisma:seed
+```
+
+5. Start the app and sign in at `/admin/login`.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 

@@ -4,15 +4,17 @@ import Hls from "hls.js";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
-const LIVE_VIDEO_URL = "https://ngvid.elektranbroadcast.com/hls/lascofed/mystream.m3u8";
+const FALLBACK_VIDEO_URL = "https://ngvid.elektranbroadcast.com/hls/lascofed/mystream.m3u8";
 
 type LiveVideoPlayerProps = {
   className?: string;
+  streamUrl?: string;
 };
 
-export default function LiveVideoPlayer({ className }: LiveVideoPlayerProps) {
+export default function LiveVideoPlayer({ className, streamUrl }: LiveVideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
+  const resolvedStreamUrl = streamUrl ?? FALLBACK_VIDEO_URL;
 
   useEffect(() => {
     const video = videoRef.current;
@@ -29,7 +31,7 @@ export default function LiveVideoPlayer({ className }: LiveVideoPlayerProps) {
     video.addEventListener("error", onError);
 
     if (video.canPlayType("application/vnd.apple.mpegurl")) {
-      video.src = LIVE_VIDEO_URL;
+      video.src = resolvedStreamUrl;
       return () => {
         video.removeEventListener("canplay", onCanPlay);
         video.removeEventListener("playing", onPlaying);
@@ -48,7 +50,7 @@ export default function LiveVideoPlayer({ className }: LiveVideoPlayerProps) {
     }
 
     const hls = new Hls();
-    hls.loadSource(LIVE_VIDEO_URL);
+    hls.loadSource(resolvedStreamUrl);
     hls.attachMedia(video);
 
     hls.on(Hls.Events.ERROR, (_, data) => {
@@ -63,7 +65,7 @@ export default function LiveVideoPlayer({ className }: LiveVideoPlayerProps) {
       video.removeEventListener("error", onError);
       hls.destroy();
     };
-  }, []);
+  }, [resolvedStreamUrl]);
 
   return (
     <div className={`${className ?? "w-full rounded-xl bg-black"} relative overflow-hidden`}>

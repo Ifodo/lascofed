@@ -7,6 +7,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import SiteHeader from "../components/site-header";
+import { getPublicSiteSettings } from "@/lib/site-settings";
 
 const managementCommittees = [
   {
@@ -72,13 +73,15 @@ const workingCommittees = [
   ["Mr. Safuraini Tunji", "Cooperative Account Managers Committee"],
 ];
 
-export default function AboutUsPage() {
+export default async function AboutUsPage() {
+  const settings = await getPublicSiteSettings();
+
   return (
     <div className="bg-slate-50 text-slate-900">
-      <SiteHeader />
+      <SiteHeader audioStreamUrl={settings.radioStreamUrl} videoStreamUrl={settings.videoStreamUrl} />
 
       <main>
-        <section className="relative isolate overflow-hidden bg-gradient-to-br from-emerald-900 via-emerald-700 to-teal-700">
+        <section className="relative isolate overflow-hidden bg-linear-to-br from-emerald-900 via-emerald-700 to-teal-700">
           <div className="absolute inset-0 opacity-25">
             <Image
               src="/lascofed-assets/f-RHrsGjF0.JPG"

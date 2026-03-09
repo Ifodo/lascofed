@@ -2,16 +2,18 @@ import Image from "next/image";
 import SiteHeader from "../components/site-header";
 import PortfolioGallery from "../components/portfolio-gallery";
 import portfolioData from "../data/portfolio-data.json";
+import { getPublicSiteSettings } from "@/lib/site-settings";
 
-export default function PortfolioPage() {
+export default async function PortfolioPage() {
+  const settings = await getPublicSiteSettings();
   const totalPhotos = portfolioData.reduce((sum, album) => sum + album.imageCount, 0);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
-      <SiteHeader />
+      <SiteHeader audioStreamUrl={settings.radioStreamUrl} videoStreamUrl={settings.videoStreamUrl} />
 
       <main>
-        <section className="relative isolate overflow-hidden bg-gradient-to-br from-emerald-900 via-emerald-700 to-teal-700">
+        <section className="relative isolate overflow-hidden bg-linear-to-br from-emerald-900 via-emerald-700 to-teal-700">
           <div className="absolute inset-0 opacity-25">
             <Image
               src="/lascofed-assets/coopconf23a-UpITIXNs.jpg"

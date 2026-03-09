@@ -19,8 +19,8 @@ body {
 }
 
 .hero-bg-motion {
-  transform: scale(1.05);
-  transition: transform 4.8s ease;
+  transform: scale(1.08);
+  transition: transform 6s ease;
 }
 
 .hero-image-slide {
@@ -35,7 +35,8 @@ body {
 }
 
 .hero-bg-motion-active {
-  transform: scale(1.12) translate3d(-1%, 1%, 0);
+  transform: scale(1.18) translate3d(-2%, 2%, 0);
+  animation: hero-pan 12s ease-in-out infinite alternate;
 }
 
 .hero-blob {
@@ -84,11 +85,14 @@ body {
 }
 
 @keyframes hero-pan {
-  from {
-    transform: scale(1.05) translate3d(0, 0, 0);
+  0% {
+    transform: scale(1.08) translate3d(0, 0, 0);
   }
-  to {
-    transform: scale(1.11) translate3d(-1%, 1%, 0);
+  50% {
+    transform: scale(1.15) translate3d(-3%, 1.5%, 0);
+  }
+  100% {
+    transform: scale(1.08) translate3d(0, 0, 0);
   }
 }
 

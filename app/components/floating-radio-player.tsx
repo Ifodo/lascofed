@@ -4,14 +4,17 @@ import { RadioIcon } from "@heroicons/react/24/outline";
 import { useEffect, useRef, useState } from "react";
 import LiveVideoPlayer from "./live-video-player";
 
-const STREAM_URL = "https://azstream.elektranbroadcast.com/listen/lascofed/radio.mp3";
-
 type Position = {
   x: number;
   y: number;
 };
 
-export default function FloatingRadioPlayer() {
+type FloatingRadioPlayerProps = {
+  audioStreamUrl: string;
+  videoStreamUrl: string;
+};
+
+export default function FloatingRadioPlayer({ audioStreamUrl, videoStreamUrl }: FloatingRadioPlayerProps) {
   const cardRef = useRef<HTMLDivElement | null>(null);
   const dragOffsetRef = useRef({ x: 0, y: 0 });
 
@@ -126,7 +129,7 @@ export default function FloatingRadioPlayer() {
           type="button"
           onPointerDown={(event) => event.stopPropagation()}
           onClick={() => setIsCollapsed((prev) => !prev)}
-          className="ml-auto rounded-full border border-black bg-black px-2 py-0.5 text-[10px] font-bold text-white transition hover:bg-black/90"
+          className="ml-auto rounded-full border border-black bg-black px-2.5 py-0.5 text-[10px] font-bold text-white transition hover:bg-black/90"
           aria-label={isCollapsed ? "Expand player" : "Collapse player"}
         >
           {isCollapsed ? "+" : "−"}
@@ -135,12 +138,12 @@ export default function FloatingRadioPlayer() {
 
       {!isCollapsed && (
         <div className="space-y-3 p-4">
-          <audio controls preload="none" className="w-full" src={STREAM_URL}>
+          <audio controls preload="none" className="w-full" src={audioStreamUrl}>
             Your browser does not support the audio element.
           </audio>
           <div className="flex flex-wrap gap-2">
             <a
-              href={STREAM_URL}
+              href={audioStreamUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex rounded-full bg-red-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-red-700"
@@ -159,10 +162,10 @@ export default function FloatingRadioPlayer() {
       )}
 
       {isLiveOpen && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 p-4">
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/70 p-4">
           <div className="w-full max-w-3xl rounded-2xl bg-white p-4 shadow-2xl md:p-5">
             <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-base font-semibold text-slate-900">COOP Live Stream</h3>
+              <h3 className="text-lg font-semibold text-slate-900">COOP Live Stream</h3>
               <button
                 type="button"
                 onClick={() => setIsLiveOpen(false)}
@@ -171,7 +174,7 @@ export default function FloatingRadioPlayer() {
                 Close
               </button>
             </div>
-            <LiveVideoPlayer className="aspect-video w-full rounded-xl bg-black" />
+            <LiveVideoPlayer streamUrl={videoStreamUrl} className="aspect-video w-full rounded-xl bg-black" />
           </div>
         </div>
       )}

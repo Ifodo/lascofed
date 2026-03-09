@@ -37,7 +37,7 @@ export async function POST(request: Request) {
     const smtpUser = process.env.SMTP_USER;
     const smtpPass = process.env.SMTP_PASS;
     const smtpSecure = process.env.SMTP_SECURE === "true";
-    const toAddress = process.env.CONTACT_TO ?? "contact@lascofed.com";
+    const toAddress = process.env.CONTACT_TO ?? "contact@coopradiong.com";
     const fromAddress = process.env.CONTACT_FROM ?? smtpUser;
 
     if (!smtpHost || !smtpUser || !smtpPass || !fromAddress) {

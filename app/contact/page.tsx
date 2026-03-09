@@ -6,14 +6,17 @@ import {
 } from "@heroicons/react/24/outline";
 import ContactForm from "../components/contact-form";
 import SiteHeader from "../components/site-header";
+import { getPublicSiteSettings } from "@/lib/site-settings";
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const settings = await getPublicSiteSettings();
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
-      <SiteHeader />
+      <SiteHeader audioStreamUrl={settings.radioStreamUrl} videoStreamUrl={settings.videoStreamUrl} />
 
       <main>
-        <section className="bg-gradient-to-r from-slate-900 via-red-900 to-slate-900 py-14 text-white md:py-16">
+        <section className="bg-linear-to-r from-slate-900 via-red-900 to-slate-900 py-14 text-white md:py-16">
           <div className="mx-auto max-w-7xl px-4 sm:px-5 md:px-8">
             <p className="inline-flex rounded-full border border-white/30 bg-white/10 px-3 py-1 text-xs font-semibold tracking-widest">
               CONTACT US
@@ -55,7 +58,7 @@ export default function ContactPage() {
               <p className="text-xs font-semibold tracking-widest text-red-700">EMAIL ADDRESS</p>
               <p className="mt-3 flex items-center gap-2 text-sm text-slate-700">
                 <EnvelopeIcon className="h-5 w-5 text-red-700" />
-                contact@lascofed.com
+                contact@coopradiong.com
               </p>
             </article>
 

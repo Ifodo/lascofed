@@ -8,9 +8,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import LiveVideoPlayer from "./live-video-player";
 
-const STREAM_URL = "https://azstream.elektranbroadcast.com/listen/lascofed/radio.mp3";
-
-type SectionId = "home" | "services" | "directory" | "events" | "contact";
+type SectionId = "home";
 
 type NavItem = {
   href: string;
@@ -20,16 +18,20 @@ type NavItem = {
 
 const navItems: NavItem[] = [
   { href: "/", label: "Home", sectionId: "home" },
+  { href: "/livestream", label: "Listen Live" },
+  { href: "/programs", label: "Programs" },
+  { href: "/news", label: "News" },
+  { href: "/events", label: "Events" },
   { href: "/aboutus", label: "About Us" },
-  { href: "/portfolio", label: "Our Portfolio" },
-  { href: "/#services", label: "Our Services", sectionId: "services" },
-  { href: "/#directory", label: "Directory", sectionId: "directory" },
-  { href: "/#events", label: "Events", sectionId: "events" },
-  { href: "/livestream", label: "Live Stream" },
   { href: "/contact", label: "Contact" },
 ];
 
-export default function SiteHeader() {
+type SiteHeaderProps = {
+  audioStreamUrl: string;
+  videoStreamUrl: string;
+};
+
+export default function SiteHeader({ audioStreamUrl, videoStreamUrl }: SiteHeaderProps) {
   const pathname = usePathname();
   const [activeSection, setActiveSection] = useState<SectionId>("home");
   const [isLiveOpen, setIsLiveOpen] = useState(false);
@@ -40,7 +42,7 @@ export default function SiteHeader() {
       return;
     }
 
-    const sectionIds: SectionId[] = ["home", "services", "directory", "events", "contact"];
+    const sectionIds: SectionId[] = ["home"];
 
     const updateActiveSection = () => {
       const topOffset = 160;
@@ -120,7 +122,7 @@ export default function SiteHeader() {
             {isMobileMenuOpen ? <XMarkIcon className="h-5 w-5" /> : <Bars3Icon className="h-5 w-5" />}
           </button>
 
-          <nav className="hidden gap-6 text-slate-600 md:flex">
+          <nav className="hidden gap-6 text-sm text-slate-600 md:flex">
             {navItems.map((item) => {
               const isActive = item.sectionId
                 ? pathname === "/" && activeSection === item.sectionId
@@ -135,13 +137,13 @@ export default function SiteHeader() {
                       setActiveSection(item.sectionId);
                     }
                   }}
-                  className={`relative pb-2 transition ${
+                  className={`relative pb-2 font-medium transition ${
                     isActive ? "text-slate-900" : "hover:text-red-700"
                   }`}
                 >
                   {item.label}
                   <span
-                    className={`absolute left-0 -bottom-[1px] h-0.5 w-full rounded-full bg-red-600 transition ${
+                    className={`absolute left-0 -bottom-px h-0.5 w-full rounded-full bg-red-600 transition ${
                       isActive ? "opacity-100" : "opacity-0"
                     }`}
                   />
@@ -152,14 +154,14 @@ export default function SiteHeader() {
 
           <div className="hidden items-center gap-2 md:inline-flex">
             <div className="w-36 overflow-hidden rounded-full border border-slate-900 bg-white lg:w-44">
-              <audio controls preload="none" className="block h-8 w-full" src={STREAM_URL}>
+              <audio controls preload="none" className="block h-8 w-full" src={audioStreamUrl}>
                 Your browser does not support the audio element.
               </audio>
             </div>
             <button
               type="button"
               onClick={() => setIsLiveOpen(true)}
-              className="inline-flex items-center rounded-full bg-red-600 px-3 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-red-700 lg:px-4"
+              className="inline-flex items-center rounded-full bg-red-600 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-red-700"
             >
               Watch Live
             </button>
@@ -168,14 +170,14 @@ export default function SiteHeader() {
 
         <div className="mt-3 flex items-center gap-2 md:hidden">
           <div className="min-w-0 flex-1 overflow-hidden rounded-full border border-slate-900 bg-white">
-            <audio controls preload="none" className="block h-8 w-full" src={STREAM_URL}>
+            <audio controls preload="none" className="block h-8 w-full" src={audioStreamUrl}>
               Your browser does not support the audio element.
             </audio>
           </div>
           <button
             type="button"
             onClick={() => setIsLiveOpen(true)}
-            className="inline-flex shrink-0 items-center rounded-full bg-red-600 px-3 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-red-700"
+            className="inline-flex shrink-0 items-center rounded-full bg-red-600 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-red-700"
           >
             Watch Live
           </button>
@@ -217,10 +219,10 @@ export default function SiteHeader() {
       {typeof document !== "undefined" &&
         isLiveOpen &&
         createPortal(
-          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4">
+          <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/70 p-4">
             <div className="w-full max-w-3xl rounded-2xl bg-black p-4 text-white shadow-2xl md:p-5">
               <div className="mb-3 flex items-center justify-between">
-                <h3 className="text-base font-semibold text-white">COOP Live Stream</h3>
+                <h3 className="text-lg font-semibold text-white">COOP Live Stream</h3>
                 <button
                   type="button"
                   onClick={() => setIsLiveOpen(false)}
@@ -229,7 +231,7 @@ export default function SiteHeader() {
                   Close
                 </button>
               </div>
-              <LiveVideoPlayer className="aspect-video w-full rounded-xl bg-black" />
+              <LiveVideoPlayer streamUrl={videoStreamUrl} className="aspect-video w-full rounded-xl bg-black" />
             </div>
           </div>,
           document.body,
